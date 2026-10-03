@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Atmos" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@color/atmos_bg</item>
+        <item name="android:navigationBarColor">@color/atmos_bg</item>
+        <item name="android:windowBackground">@color/atmos_bg</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+    <style name="Theme.Atmos.Splash" parent="Theme.Atmos">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+</resources>

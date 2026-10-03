@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ATMOS</string>
+    <string name="app_tagline">ATMOS//OS</string>
+    <string name="sync">SYNC</string>
+    <string name="city">CIUDAD</string>
+    <string name="loading">// ENLAZANDO CON SATÉLITE</string>
+    <string name="locating">LOCALIZANDO…</string>
+    <string name="no_alerts">SIN AVISOS ACTIVOS</string>
+    <string name="use_gps">USAR MI UBICACIÓN (GPS)</string>
+    <string name="search_hint">Buscar ciudad…</string>
+    <string name="no_results">SIN RESULTADOS</string>
+    <string name="saved_cities">CIUDADES GUARDADAS</string>
+    <string name="section_now">01 AHORA</string>
+    <string name="section_hours">02 PRÓXIMAS HORAS</string>
+    <string name="section_days">03 PRÓXIMOS 14 DÍAS</string>
+    <string name="section_wind">04 VIENTO</string>
+    <string name="section_air">05 CALIDAD DEL AIRE</string>
+    <string name="section_pollen">06 POLEN</string>
+    <string name="section_sun">07 SOL Y LUNA</string>
+    <string name="section_radar">08 RADAR</string>
+    <string name="footer">ATMOS//OS · OPEN-METEO</string>
+    <string name="no_network">SIN RED</string>
+    <string name="live_data">DATOS EN VIVO</string>
+    <string name="rain_toggle">LLUVIA DIGITAL</string>
+    <string name="settings">AJUSTES</string>
+    <string name="credits">CRÉDITOS: Open-Meteo (CC BY 4.0) · RainViewer · © OpenStreetMap · © CARTO</string>
+</resources>
