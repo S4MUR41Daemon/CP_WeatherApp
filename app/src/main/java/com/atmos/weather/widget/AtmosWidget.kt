@@ -25,7 +25,7 @@ import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import androidx.glance.color.ColorProvider
+import androidx.glance.unit.ColorProvider
 import androidx.compose.ui.graphics.Color
 import com.atmos.weather.AtmosApp
 import com.atmos.weather.MainActivity
