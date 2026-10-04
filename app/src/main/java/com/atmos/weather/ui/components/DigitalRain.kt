@@ -86,8 +86,8 @@ fun DigitalRain(
     }
 
     val wet = rainIntensity > 0
-    val head = if (wet) AtmosColors.Cyan else AtmosColors.Yellow
-    val tail = if (wet) AtmosColors.Cyan else AtmosColors.Red
+    val head = if (wet) AtmosColors.Data else AtmosColors.Primary
+    val tail = if (wet) AtmosColors.Data else AtmosColors.Secondary
     val base = if (wet) 0.9f else 0.55f
 
     Canvas(modifier) {

@@ -10,6 +10,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -38,14 +39,17 @@ private val TILE: Dp = 150.dp
 private val MAP_H: Dp = 250.dp
 
 /**
- * Teselas OSM estándar (sin API key; CARTO ahora la exige) convertidas a un mapa nocturno
- * rojizo con una matriz de color: luminancia invertida y teñida. Se aplica en GPU al dibujar.
+ * Teselas OSM estándar (sin API key; CARTO ahora la exige) convertidas a un mapa nocturno con una
+ * matriz de color: luminancia invertida y teñida con el color secundario de la plantilla activa.
+ * Se aplica en GPU al dibujar.
  */
-private val NIGHT_CITY_FILTER: ColorFilter = run {
-    val kr = 0.62f; val kg = 0.30f; val kb = 0.36f
-    fun row(k: Float, bias: Float) = floatArrayOf(-0.299f * k, -0.587f * k, -0.114f * k, 0f, 255f * k + bias)
-    ColorFilter.colorMatrix(
-        ColorMatrix(row(kr, 6f) + row(kg, 4f) + row(kb, 8f) + floatArrayOf(0f, 0f, 0f, 1f, 0f))
+private fun nightMapFilter(tint: Color): ColorFilter {
+    fun row(c: Float, bias: Float): FloatArray {
+        val k = 0.18f + 0.5f * c
+        return floatArrayOf(-0.299f * k, -0.587f * k, -0.114f * k, 0f, 255f * k + bias)
+    }
+    return ColorFilter.colorMatrix(
+        ColorMatrix(row(tint.red, 6f) + row(tint.green, 4f) + row(tint.blue, 8f) + floatArrayOf(0f, 0f, 0f, 1f, 0f))
     )
 }
 
@@ -59,6 +63,8 @@ fun RadarMap(radar: RadarUi, lat: Double, lon: Double) {
     var playing by remember(radar) { mutableStateOf(false) }
     val ctx = LocalContext.current
 
+    val tint = AtmosColors.Secondary
+    val mapFilter = remember(tint) { nightMapFilter(tint) }
     val xt = remember(lon) { tileX(lon, ZOOM) }
     val yt = remember(lat) { tileY(lat, ZOOM) }
 
@@ -96,7 +102,7 @@ fun RadarMap(radar: RadarUi, lat: Double, lon: Double) {
             val tileMod = Modifier.offset(ox, oy).size(TILE)
             AsyncImage(
                 model = baseUrl(wx, y), contentDescription = null, modifier = tileMod,
-                contentScale = ContentScale.FillBounds, colorFilter = NIGHT_CITY_FILTER
+                contentScale = ContentScale.FillBounds, colorFilter = mapFilter
             )
             AsyncImage(
                 model = radarUrl(radar.host, frames[idx].path, wx, y), contentDescription = null, modifier = tileMod,
@@ -106,16 +112,16 @@ fun RadarMap(radar: RadarUi, lat: Double, lon: Double) {
         RadarHud(Modifier.matchParentSize())
         Text(
             fmtTime(frames[idx].time),
-            style = AtmosType.monoBig.copy(color = AtmosColors.Yellow),
+            style = AtmosType.monoBig.copy(color = AtmosColors.Primary),
             modifier = Modifier.align(Alignment.TopEnd).background(AtmosColors.Bg.copy(alpha = 0.75f)).padding(horizontal = 8.dp, vertical = 3.dp)
         )
     }
     Spacer(Modifier.height(10.dp))
     Row(verticalAlignment = Alignment.CenterVertically) {
-        CyberButton(if (playing) "❚❚ PAUSA" else "▶ ANIMAR", color = AtmosColors.Yellow, filled = !playing) { playing = !playing }
+        CyberButton(if (playing) "❚❚ PAUSA" else "▶ ANIMAR", color = AtmosColors.Primary, filled = !playing) { playing = !playing }
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            SegBar(frames.size, idx + 1, AtmosColors.Cyan, height = 8.dp)
+            SegBar(frames.size, idx + 1, AtmosColors.Data, height = 8.dp)
             Spacer(Modifier.height(4.dp))
             Text("−${(frames.size - 1 - idx) * 10} MIN", style = AtmosType.label.copy(color = AtmosColors.Muted))
         }
@@ -140,17 +146,17 @@ private fun RadarHud(modifier: Modifier) {
             val sw = 2.dp.toPx()
             val ring = Stroke(1.5.dp.toPx())
             onDrawBehind {
-                drawCircle(AtmosColors.Red.copy(alpha = 0.25f), 26.dp.toPx(), c, style = ring)
-                drawCircle(AtmosColors.Red, 5.dp.toPx(), c)
-                drawLine(AtmosColors.Red, Offset(c.x - 40.dp.toPx(), c.y), Offset(c.x - 12.dp.toPx(), c.y), 1.dp.toPx())
-                drawLine(AtmosColors.Red, Offset(c.x + 12.dp.toPx(), c.y), Offset(c.x + 40.dp.toPx(), c.y), 1.dp.toPx())
-                drawLine(AtmosColors.Red, Offset(c.x, c.y - 40.dp.toPx()), Offset(c.x, c.y - 12.dp.toPx()), 1.dp.toPx())
-                drawLine(AtmosColors.Red, Offset(c.x, c.y + 12.dp.toPx()), Offset(c.x, c.y + 40.dp.toPx()), 1.dp.toPx())
+                drawCircle(AtmosColors.Secondary.copy(alpha = 0.25f), 26.dp.toPx(), c, style = ring)
+                drawCircle(AtmosColors.Secondary, 5.dp.toPx(), c)
+                drawLine(AtmosColors.Secondary, Offset(c.x - 40.dp.toPx(), c.y), Offset(c.x - 12.dp.toPx(), c.y), 1.dp.toPx())
+                drawLine(AtmosColors.Secondary, Offset(c.x + 12.dp.toPx(), c.y), Offset(c.x + 40.dp.toPx(), c.y), 1.dp.toPx())
+                drawLine(AtmosColors.Secondary, Offset(c.x, c.y - 40.dp.toPx()), Offset(c.x, c.y - 12.dp.toPx()), 1.dp.toPx())
+                drawLine(AtmosColors.Secondary, Offset(c.x, c.y + 12.dp.toPx()), Offset(c.x, c.y + 40.dp.toPx()), 1.dp.toPx())
                 val w = size.width; val h = size.height
-                val y = AtmosColors.Yellow
+                val y = AtmosColors.Primary
                 drawRect(y, Offset(0f, 0f), Size(arm, sw)); drawRect(y, Offset(0f, 0f), Size(sw, arm))
                 drawRect(y, Offset(w - arm, h - sw), Size(arm, sw)); drawRect(y, Offset(w - sw, h - arm), Size(sw, arm))
-                drawRect(AtmosColors.LineR, Offset.Zero, size, style = Stroke(1.dp.toPx()))
+                drawRect(AtmosColors.LineSecondary, Offset.Zero, size, style = Stroke(1.dp.toPx()))
             }
         }
     )

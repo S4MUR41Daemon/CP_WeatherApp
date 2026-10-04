@@ -29,11 +29,13 @@ class PrefsStore(private val context: Context) {
     private val RAIN_KEY = booleanPreferencesKey("rain_enabled")
     private val UNITS_C_KEY = booleanPreferencesKey("units_celsius")
     private val WIDGET_FREQ_KEY = intPreferencesKey("widget_freq_min")
+    private val THEME_KEY = stringPreferencesKey("theme")
     private val json = Json { ignoreUnknownKeys = true }
 
     val rainEnabled: Flow<Boolean> = context.prefsStore.data.map { it[RAIN_KEY] ?: true }
     val unitsCelsius: Flow<Boolean> = context.prefsStore.data.map { it[UNITS_C_KEY] ?: true }
     val widgetFreqMin: Flow<Int> = context.prefsStore.data.map { it[WIDGET_FREQ_KEY] ?: 60 }
+    val themeId: Flow<String?> = context.prefsStore.data.map { it[THEME_KEY] }
     val savedCities: Flow<List<SavedCity>> = context.prefsStore.data.map {
         val s = it[CITIES_KEY] ?: return@map emptyList()
         try { json.decodeFromString<List<SavedCity>>(s) } catch (_: Throwable) { emptyList() }
@@ -42,6 +44,7 @@ class PrefsStore(private val context: Context) {
     suspend fun setRainEnabled(v: Boolean) { context.prefsStore.edit { it[RAIN_KEY] = v } }
     suspend fun setUnitsCelsius(v: Boolean) { context.prefsStore.edit { it[UNITS_C_KEY] = v } }
     suspend fun setWidgetFreq(v: Int) { context.prefsStore.edit { it[WIDGET_FREQ_KEY] = v } }
+    suspend fun setThemeId(id: String) { context.prefsStore.edit { it[THEME_KEY] = id } }
     suspend fun setSavedCities(list: List<SavedCity>) {
         context.prefsStore.edit { it[CITIES_KEY] = json.encodeToString(list) }
     }

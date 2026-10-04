@@ -36,7 +36,7 @@ import com.atmos.weather.domain.*
 import com.atmos.weather.ui.components.*
 import com.atmos.weather.ui.theme.AtmosColors
 import com.atmos.weather.ui.theme.AtmosType
-import com.atmos.weather.ui.theme.ChromaRed
+import com.atmos.weather.ui.theme.ChromaShift
 import com.atmos.weather.ui.theme.ShareTechMono
 import kotlin.math.PI
 import kotlin.math.abs
@@ -48,15 +48,15 @@ import kotlin.math.sin
 
 @Composable
 fun SectionNow(now: NowUi) {
-    NeonPanel("01", "AHORA", color = AtmosColors.Yellow, trailing = if (now.isDay) "DÍA" else "NOCHE") {
+    NeonPanel("01", "AHORA", color = AtmosColors.Primary, trailing = if (now.isDay) "DÍA" else "NOCHE") {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Row(verticalAlignment = Alignment.Top) {
                 Text(
                     "${now.temp}",
-                    style = AtmosType.tempBig.copy(color = AtmosColors.Text, shadow = ChromaRed),
+                    style = AtmosType.tempBig.copy(color = AtmosColors.Text, shadow = ChromaShift),
                     maxLines = 1
                 )
-                Text("°C", style = AtmosType.title.copy(color = AtmosColors.Yellow), modifier = Modifier.padding(top = 18.dp, start = 2.dp))
+                Text("°C", style = AtmosType.title.copy(color = AtmosColors.Primary), modifier = Modifier.padding(top = 18.dp, start = 2.dp))
             }
             Spacer(Modifier.width(12.dp))
             Column(Modifier.weight(1f), horizontalAlignment = Alignment.End) {
@@ -68,9 +68,9 @@ fun SectionNow(now: NowUi) {
                 )
                 Spacer(Modifier.height(4.dp))
                 Row {
-                    Text("▲${now.hi}°", style = AtmosType.monoBig.copy(color = AtmosColors.RedSoft))
+                    Text("▲${now.hi}°", style = AtmosType.monoBig.copy(color = AtmosColors.SecondarySoft))
                     Spacer(Modifier.width(8.dp))
-                    Text("▼${now.lo}°", style = AtmosType.monoBig.copy(color = AtmosColors.Cyan))
+                    Text("▼${now.lo}°", style = AtmosType.monoBig.copy(color = AtmosColors.Data))
                 }
             }
         }
@@ -87,7 +87,7 @@ fun SectionNow(now: NowUi) {
             stats.chunked(3).forEachIndexed { r, row ->
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     row.forEachIndexed { c, (k, v) ->
-                        StatCell(k, v, Modifier.weight(1f), accent = if ((r + c) % 2 == 0) AtmosColors.Yellow else AtmosColors.Red)
+                        StatCell(k, v, Modifier.weight(1f), accent = if ((r + c) % 2 == 0) AtmosColors.Primary else AtmosColors.Secondary)
                     }
                 }
             }
@@ -106,8 +106,8 @@ private fun RangeChips(range: Int, onRange: (Int) -> Unit) {
             Box(
                 Modifier
                     .clip(shape)
-                    .background(if (on) AtmosColors.Yellow else Color.Transparent)
-                    .border(1.dp, if (on) AtmosColors.Yellow else AtmosColors.LineR, shape)
+                    .background(if (on) AtmosColors.Primary else Color.Transparent)
+                    .border(1.dp, if (on) AtmosColors.Primary else AtmosColors.LineSecondary, shape)
                     .clickable { onRange(v) }
                     .padding(horizontal = 12.dp, vertical = 5.dp)
             ) {
@@ -129,8 +129,8 @@ fun SectionHours(hours: List<HourUi>, range: Int, onRange: (Int) -> Unit) {
         HourlyChart(data)
         Spacer(Modifier.height(6.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-            Legend(AtmosColors.Yellow, "TEMP °C")
-            Legend(AtmosColors.Cyan, "% LLUVIA")
+            Legend(AtmosColors.Primary, "TEMP °C")
+            Legend(AtmosColors.Data, "% LLUVIA")
             Legend(AtmosColors.Muted, "VIENTO KM/H")
         }
     }
@@ -181,15 +181,15 @@ private fun HourlyChart(data: List<HourUi>) {
                         close()
                     }
                     val areaBrush = Brush.verticalGradient(
-                        listOf(AtmosColors.Yellow.copy(alpha = 0.28f), Color.Transparent),
+                        listOf(AtmosColors.Primary.copy(alpha = 0.28f), Color.Transparent),
                         startY = lineTop, endY = lineBottom + 6f * dp
                     )
                     val sTemp = TextStyle(fontFamily = ShareTechMono, fontSize = 11.sp, color = AtmosColors.Text)
-                    val sProb = TextStyle(fontFamily = ShareTechMono, fontSize = 10.sp, color = AtmosColors.Cyan)
+                    val sProb = TextStyle(fontFamily = ShareTechMono, fontSize = 10.sp, color = AtmosColors.Data)
                     val sProbOff = sProb.copy(color = AtmosColors.Dim)
                     val sWind = TextStyle(fontFamily = ShareTechMono, fontSize = 10.sp, color = AtmosColors.Muted)
                     val sHour = TextStyle(fontFamily = ShareTechMono, fontSize = 11.sp, color = AtmosColors.Muted)
-                    val sNow = sHour.copy(color = AtmosColors.Yellow)
+                    val sNow = sHour.copy(color = AtmosColors.Primary)
                     val tTemp = data.map { measurer.measure("${Math.round(it.temp)}°", sTemp) }
                     val tProb = data.map { measurer.measure("${it.prob}%", if (it.prob > 0) sProb else sProbOff) }
                     val tWind = data.map { measurer.measure("${it.wind}", sWind) }
@@ -203,14 +203,14 @@ private fun HourlyChart(data: List<HourUi>) {
                         data.forEachIndexed { i, h ->
                             if (h.label == "00" && i > 0) {
                                 val x = i * pw
-                                drawLine(AtmosColors.LineR, Offset(x, 0f), Offset(x, size.height), 1f * dp, pathEffect = dash)
+                                drawLine(AtmosColors.LineSecondary, Offset(x, 0f), Offset(x, size.height), 1f * dp, pathEffect = dash)
                             }
                         }
                         drawPath(area, areaBrush)
-                        drawPath(line, AtmosColors.Yellow.copy(alpha = 0.22f), style = glow)
-                        drawPath(line, AtmosColors.Yellow, style = core)
+                        drawPath(line, AtmosColors.Primary.copy(alpha = 0.22f), style = glow)
+                        drawPath(line, AtmosColors.Primary, style = core)
                         pts.forEachIndexed { i, p ->
-                            val c = if (i == 0) AtmosColors.Red else AtmosColors.Yellow
+                            val c = if (i == 0) AtmosColors.Secondary else AtmosColors.Primary
                             val r = if (i == 0) 4.5f * dp else 2.5f * dp
                             drawRect(c, Offset(p.x - r, p.y - r), Size(r * 2, r * 2))
                             val t = tTemp[i]
@@ -219,8 +219,8 @@ private fun HourlyChart(data: List<HourUi>) {
                         data.forEachIndexed { i, h ->
                             val cx = i * pw + pw / 2
                             val bh = (h.prob / 100f) * barsMax
-                            drawRect(AtmosColors.Cyan.copy(alpha = 0.12f), Offset(cx - pw * 0.22f, barsBottom - barsMax), Size(pw * 0.44f, barsMax))
-                            if (bh > 0f) drawRect(AtmosColors.Cyan.copy(alpha = 0.75f), Offset(cx - pw * 0.22f, barsBottom - bh), Size(pw * 0.44f, bh))
+                            drawRect(AtmosColors.Data.copy(alpha = 0.12f), Offset(cx - pw * 0.22f, barsBottom - barsMax), Size(pw * 0.44f, barsMax))
+                            if (bh > 0f) drawRect(AtmosColors.Data.copy(alpha = 0.75f), Offset(cx - pw * 0.22f, barsBottom - bh), Size(pw * 0.44f, bh))
                             val tp = tProb[i]
                             drawText(tp, topLeft = Offset(cx - tp.size.width / 2f, barsBottom + 3f * dp))
                             val tw = tWind[i]
@@ -236,14 +236,14 @@ private fun HourlyChart(data: List<HourUi>) {
 
 // ───────────────────────────── 03 14 DÍAS ─────────────────────────────
 
-private val TEMP_GRADIENT = listOf(AtmosColors.Cyan, AtmosColors.Yellow, AtmosColors.Red)
+private val TEMP_GRADIENT get() = listOf(AtmosColors.Data, AtmosColors.Primary, AtmosColors.Secondary)
 
 @Composable
 fun SectionDays(days: List<DayUi>, openDay: Int, onToggle: (Int) -> Unit) {
     if (days.isEmpty()) return
     NeonPanel("03", "PRÓXIMOS ${days.size} DÍAS") {
         days.forEachIndexed { i, d ->
-            if (i > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(AtmosColors.LineY.copy(alpha = 0.12f)))
+            if (i > 0) Box(Modifier.fillMaxWidth().height(1.dp).background(AtmosColors.LinePrimary.copy(alpha = 0.12f)))
             DayRow(d, open = openDay == i, onClick = { onToggle(i) })
         }
     }
@@ -254,12 +254,12 @@ private fun DayRow(d: DayUi, open: Boolean, onClick: () -> Unit) {
     Column(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 7.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.width(44.dp)) {
-                Text(d.weekday, style = AtmosType.title.copy(color = if (d.label == "HOY") AtmosColors.Yellow else AtmosColors.Text, fontSize = 14.sp))
+                Text(d.weekday, style = AtmosType.title.copy(color = if (d.label == "HOY") AtmosColors.Primary else AtmosColors.Text, fontSize = 14.sp))
                 if (d.label != "HOY") Text(d.label, style = AtmosType.label.copy(color = AtmosColors.Muted))
             }
             Box(Modifier.width(54.dp)) { CodeChip(d.code) }
             Text(
-                "${d.tmin}°", style = AtmosType.mono.copy(color = AtmosColors.Cyan, textAlign = TextAlign.End),
+                "${d.tmin}°", style = AtmosType.mono.copy(color = AtmosColors.Data, textAlign = TextAlign.End),
                 modifier = Modifier.width(30.dp)
             )
             Canvas(Modifier.weight(1f).height(8.dp).padding(horizontal = 8.dp)) {
@@ -271,12 +271,12 @@ private fun DayRow(d: DayUi, open: Boolean, onClick: () -> Unit) {
                 drawRect(brush, Offset(x0, 0f), Size(x1 - x0, size.height))
             }
             Text(
-                "${d.tmax}°", style = AtmosType.mono.copy(color = AtmosColors.RedSoft),
+                "${d.tmax}°", style = AtmosType.mono.copy(color = AtmosColors.SecondarySoft),
                 modifier = Modifier.width(30.dp)
             )
             Text(
                 "${d.prob}%",
-                style = AtmosType.mono.copy(color = if (d.prob >= 30) AtmosColors.Cyan else AtmosColors.Muted, textAlign = TextAlign.End),
+                style = AtmosType.mono.copy(color = if (d.prob >= 30) AtmosColors.Data else AtmosColors.Muted, textAlign = TextAlign.End),
                 modifier = Modifier.width(38.dp)
             )
         }
@@ -286,11 +286,11 @@ private fun DayRow(d: DayUi, open: Boolean, onClick: () -> Unit) {
                 Modifier
                     .fillMaxWidth()
                     .background(AtmosColors.PanelHi)
-                    .drawBehind { drawRect(AtmosColors.Red, Offset.Zero, Size(2.dp.toPx(), size.height)) }
+                    .drawBehind { drawRect(AtmosColors.Secondary, Offset.Zero, Size(2.dp.toPx(), size.height)) }
                     .padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(3.dp)
             ) {
-                Text(d.desc, style = AtmosType.title.copy(color = AtmosColors.Yellow))
+                Text(d.desc, style = AtmosType.title.copy(color = AtmosColors.Primary))
                 Text("LLUVIA ${"%.1f".format(d.precip)} MM · PROB ${d.prob}% · UV ${d.uv}", style = AtmosType.label.copy(color = AtmosColors.Text))
                 Text("VIENTO ${d.wind} KM/H ${d.dir} · RACHAS ${d.gust}", style = AtmosType.label.copy(color = AtmosColors.Text))
                 Text("AMANECE ${d.sunrise} · OCASO ${d.sunset}", style = AtmosType.label.copy(color = AtmosColors.Muted))
@@ -309,25 +309,25 @@ fun SectionWind(wind: WindUi) {
             Spacer(Modifier.width(16.dp))
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Row(verticalAlignment = Alignment.Bottom) {
-                    Text("${wind.speed}", style = AtmosType.numLarge.copy(color = AtmosColors.Text, shadow = ChromaRed))
+                    Text("${wind.speed}", style = AtmosType.numLarge.copy(color = AtmosColors.Text, shadow = ChromaShift))
                     Spacer(Modifier.width(4.dp))
-                    Text("KM/H", style = AtmosType.label.copy(color = AtmosColors.Yellow), modifier = Modifier.padding(bottom = 4.dp))
+                    Text("KM/H", style = AtmosType.label.copy(color = AtmosColors.Primary), modifier = Modifier.padding(bottom = 4.dp))
                 }
                 Text("DIRECCIÓN · ${wind.dir} ${wind.dirDeg.toInt()}°", style = AtmosType.label.copy(color = AtmosColors.Muted))
-                Text("RACHAS · ${wind.gust} KM/H", style = AtmosType.label.copy(color = AtmosColors.Red))
+                Text("RACHAS · ${wind.gust} KM/H", style = AtmosType.label.copy(color = AtmosColors.Secondary))
                 Text("MÁX. HOY · ${wind.maxToday} KM/H", style = AtmosType.label.copy(color = AtmosColors.Muted))
-                Text(wind.beaufortName, style = AtmosType.title.copy(color = AtmosColors.Yellow), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                SegBar(12, wind.beaufort.coerceAtLeast(1), AtmosColors.Yellow, segmentColors = BEAUFORT_COLORS)
+                Text(wind.beaufortName, style = AtmosType.title.copy(color = AtmosColors.Primary), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                SegBar(12, wind.beaufort.coerceAtLeast(1), AtmosColors.Primary, segmentColors = BEAUFORT_COLORS)
             }
         }
     }
 }
 
-private val BEAUFORT_COLORS = List(12) { i ->
+private val BEAUFORT_COLORS get() = List(12) { i ->
     when {
-        i < 4 -> AtmosColors.Cyan
-        i < 8 -> AtmosColors.Yellow
-        else -> AtmosColors.Red
+        i < 4 -> AtmosColors.Data
+        i < 8 -> AtmosColors.Primary
+        else -> AtmosColors.Secondary
     }
 }
 
@@ -341,7 +341,7 @@ private fun Compass(wind: WindUi, modifier: Modifier) {
             val r = min(cx, cy) - 2.dp.toPx()
             val sCard = TextStyle(fontFamily = ShareTechMono, fontSize = 11.sp, color = AtmosColors.Muted)
             val cards = listOf("N", "E", "S", "O").map {
-                measurer.measure(it, if (it == "N") sCard.copy(color = AtmosColors.Red) else sCard)
+                measurer.measure(it, if (it == "N") sCard.copy(color = AtmosColors.Secondary) else sCard)
             }
             val ring = Stroke(1.dp.toPx())
             val arrow = Path().apply {
@@ -355,9 +355,9 @@ private fun Compass(wind: WindUi, modifier: Modifier) {
                 close()
             }
             onDrawBehind {
-                drawCircle(AtmosColors.Red.copy(alpha = 0.08f), r, Offset(cx, cy))
-                drawCircle(AtmosColors.LineR, r, Offset(cx, cy), style = ring)
-                drawCircle(AtmosColors.LineY, r * 0.62f, Offset(cx, cy), style = ring)
+                drawCircle(AtmosColors.Secondary.copy(alpha = 0.08f), r, Offset(cx, cy))
+                drawCircle(AtmosColors.LineSecondary, r, Offset(cx, cy), style = ring)
+                drawCircle(AtmosColors.LinePrimary, r * 0.62f, Offset(cx, cy), style = ring)
                 for (i in 0 until 72) {
                     val a = i * 5 * PI / 180
                     val major = i % 18 == 0
@@ -365,7 +365,7 @@ private fun Compass(wind: WindUi, modifier: Modifier) {
                     val s = sin(a).toFloat()
                     val c = cos(a).toFloat()
                     drawLine(
-                        if (major) AtmosColors.Yellow else AtmosColors.LineY,
+                        if (major) AtmosColors.Primary else AtmosColors.LinePrimary,
                         Offset(cx + (r - len) * s, cy - (r - len) * c), Offset(cx + r * s, cy - r * c),
                         if (major) 2.dp.toPx() else 1.dp.toPx()
                     )
@@ -379,10 +379,10 @@ private fun Compass(wind: WindUi, modifier: Modifier) {
                 }
                 // La flecha apunta hacia donde VA el viento (procedencia + 180°).
                 rotate(wind.dirDeg + 180f, Offset(cx, cy)) {
-                    drawPath(arrow, AtmosColors.Yellow.copy(alpha = 0.25f), style = Stroke(5.dp.toPx()))
-                    drawPath(arrow, AtmosColors.Yellow)
+                    drawPath(arrow, AtmosColors.Primary.copy(alpha = 0.25f), style = Stroke(5.dp.toPx()))
+                    drawPath(arrow, AtmosColors.Primary)
                 }
-                drawCircle(AtmosColors.Red, 4.dp.toPx(), Offset(cx, cy))
+                drawCircle(AtmosColors.Secondary, 4.dp.toPx(), Offset(cx, cy))
             }
         }
     )
@@ -390,14 +390,14 @@ private fun Compass(wind: WindUi, modifier: Modifier) {
 
 // ───────────────────────────── 05 AIRE ─────────────────────────────
 
-private val AQI_COLORS = listOf(AtmosColors.Cyan, AtmosColors.Cyan, AtmosColors.Yellow, AtmosColors.Yellow, AtmosColors.Red, AtmosColors.Red)
+private val AQI_COLORS get() = listOf(AtmosColors.Data, AtmosColors.Data, AtmosColors.Primary, AtmosColors.Primary, AtmosColors.Secondary, AtmosColors.Secondary)
 
 @Composable
 fun SectionAir(air: AirUi) {
     NeonPanel("05", "CALIDAD DEL AIRE", trailing = "EU-AQI") {
         val color = if (air.level < 0) AtmosColors.Muted else AQI_COLORS[air.level]
         Row(verticalAlignment = Alignment.Bottom) {
-            Text(air.aqi?.toString() ?: "N/D", style = AtmosType.tempBig.copy(color = color, fontSize = 64.sp, lineHeight = 60.sp, shadow = ChromaRed))
+            Text(air.aqi?.toString() ?: "N/D", style = AtmosType.tempBig.copy(color = color, fontSize = 64.sp, lineHeight = 60.sp, shadow = ChromaShift))
             Spacer(Modifier.width(12.dp))
             Text(air.levelName, style = AtmosType.title.copy(color = AtmosColors.Text), modifier = Modifier.padding(bottom = 10.dp))
         }
@@ -406,7 +406,7 @@ fun SectionAir(air: AirUi) {
         Spacer(Modifier.height(12.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             air.cells.forEachIndexed { i, (k, v) ->
-                StatCell(k, v, Modifier.weight(1f), accent = if (i % 2 == 0) AtmosColors.Cyan else AtmosColors.Yellow)
+                StatCell(k, v, Modifier.weight(1f), accent = if (i % 2 == 0) AtmosColors.Data else AtmosColors.Primary)
             }
         }
         Spacer(Modifier.height(4.dp))
@@ -425,7 +425,7 @@ fun SectionPollen(rows: List<PollenRow>) {
                 return@NeonPanel
             }
             rows.all { it.level <= 0 } -> {
-                Text("// AIRE LIMPIO · SIN POLEN SIGNIFICATIVO", style = AtmosType.mono.copy(color = AtmosColors.Cyan))
+                Text("// AIRE LIMPIO · SIN POLEN SIGNIFICATIVO", style = AtmosType.mono.copy(color = AtmosColors.Data))
                 Spacer(Modifier.height(10.dp))
             }
         }
@@ -437,9 +437,9 @@ fun SectionPollen(rows: List<PollenRow>) {
                 val c = when {
                     p.level < 0 -> AtmosColors.Dim
                     p.level == 0 -> AtmosColors.Muted
-                    p.level == 1 -> AtmosColors.Cyan
-                    p.level == 2 -> AtmosColors.Yellow
-                    else -> AtmosColors.Red
+                    p.level == 1 -> AtmosColors.Data
+                    p.level == 2 -> AtmosColors.Primary
+                    else -> AtmosColors.Secondary
                 }
                 Text(p.label, style = AtmosType.label.copy(color = c), modifier = Modifier.width(64.dp))
             }
@@ -447,14 +447,14 @@ fun SectionPollen(rows: List<PollenRow>) {
     }
 }
 
-private val POLLEN_COLORS = listOf(AtmosColors.Cyan, AtmosColors.Yellow, AtmosColors.Red, AtmosColors.Red)
+private val POLLEN_COLORS get() = listOf(AtmosColors.Data, AtmosColors.Primary, AtmosColors.Secondary, AtmosColors.Secondary)
 
 // ───────────────────────────── 07 SOL Y LUNA ─────────────────────────────
 
 @Composable
 fun SectionSunMoon(sm: SunMoonUi?) {
     if (sm == null) return
-    NeonPanel("07", "SOL Y LUNA", color = AtmosColors.Yellow, trailing = if (sm.dayFrac != null) "${(sm.dayFrac * 100).toInt()}% DÍA" else "NOCHE") {
+    NeonPanel("07", "SOL Y LUNA", color = AtmosColors.Primary, trailing = if (sm.dayFrac != null) "${(sm.dayFrac * 100).toInt()}% DÍA" else "NOCHE") {
         SunArc(sm.dayFrac, Modifier.fillMaxWidth().height(110.dp))
         Spacer(Modifier.height(6.dp))
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -463,13 +463,13 @@ fun SectionSunMoon(sm: SunMoonUi?) {
             LabeledValue("OCASO", sm.sunset, Alignment.End)
         }
         Spacer(Modifier.height(14.dp))
-        Box(Modifier.fillMaxWidth().height(1.dp).background(AtmosColors.LineY.copy(alpha = 0.15f)))
+        Box(Modifier.fillMaxWidth().height(1.dp).background(AtmosColors.LinePrimary.copy(alpha = 0.15f)))
         Spacer(Modifier.height(14.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Moon(sm.moonPhase, Modifier.size(56.dp))
             Spacer(Modifier.width(14.dp))
             Column {
-                Text(sm.moonName, style = AtmosType.title.copy(color = AtmosColors.Yellow))
+                Text(sm.moonName, style = AtmosType.title.copy(color = AtmosColors.Primary))
                 Text("ILUMINACIÓN ${sm.moonIllum}% · LLENA EN ${sm.moonDaysToFull} D", style = AtmosType.label.copy(color = AtmosColors.Muted))
             }
         }
@@ -511,18 +511,18 @@ private fun SunArc(dayFrac: Float?, modifier: Modifier) {
             val solid = Stroke(2.dp.toPx())
             val glow = Stroke(7.dp.toPx())
             onDrawBehind {
-                drawLine(AtmosColors.LineR, Offset(0f, base), Offset(w, base), 1.dp.toPx())
-                drawPath(full, AtmosColors.LineY, style = dash)
+                drawLine(AtmosColors.LineSecondary, Offset(0f, base), Offset(w, base), 1.dp.toPx())
+                drawPath(full, AtmosColors.LinePrimary, style = dash)
                 if (sun != null) {
-                    drawPath(done, AtmosColors.Yellow.copy(alpha = 0.2f), style = glow)
-                    drawPath(done, AtmosColors.Yellow, style = solid)
-                    drawCircle(AtmosColors.Red.copy(alpha = 0.18f), 16.dp.toPx(), sun)
-                    drawCircle(AtmosColors.Red.copy(alpha = 0.35f), 11.dp.toPx(), sun)
-                    drawCircle(AtmosColors.Red, 7.dp.toPx(), sun)
-                    drawCircle(AtmosColors.Yellow, 3.dp.toPx(), sun)
+                    drawPath(done, AtmosColors.Primary.copy(alpha = 0.2f), style = glow)
+                    drawPath(done, AtmosColors.Primary, style = solid)
+                    drawCircle(AtmosColors.Secondary.copy(alpha = 0.18f), 16.dp.toPx(), sun)
+                    drawCircle(AtmosColors.Secondary.copy(alpha = 0.35f), 11.dp.toPx(), sun)
+                    drawCircle(AtmosColors.Secondary, 7.dp.toPx(), sun)
+                    drawCircle(AtmosColors.Primary, 3.dp.toPx(), sun)
                 }
-                drawRect(AtmosColors.Yellow, Offset(p0.x - 3.dp.toPx(), base - 3.dp.toPx()), Size(6.dp.toPx(), 6.dp.toPx()))
-                drawRect(AtmosColors.Red, Offset(p2.x - 3.dp.toPx(), base - 3.dp.toPx()), Size(6.dp.toPx(), 6.dp.toPx()))
+                drawRect(AtmosColors.Primary, Offset(p0.x - 3.dp.toPx(), base - 3.dp.toPx()), Size(6.dp.toPx(), 6.dp.toPx()))
+                drawRect(AtmosColors.Secondary, Offset(p2.x - 3.dp.toPx(), base - 3.dp.toPx()), Size(6.dp.toPx(), 6.dp.toPx()))
             }
         }
     )
@@ -552,10 +552,10 @@ private fun Moon(phase: Double, modifier: Modifier) {
                 close()
             }
             onDrawBehind {
-                drawCircle(AtmosColors.Yellow.copy(alpha = 0.12f), r + 3.dp.toPx(), c)
+                drawCircle(AtmosColors.Primary.copy(alpha = 0.12f), r + 3.dp.toPx(), c)
                 drawCircle(AtmosColors.PanelHi, r, c)
                 drawPath(lit, AtmosColors.Text)
-                drawCircle(AtmosColors.LineY, r, c, style = Stroke(1.dp.toPx()))
+                drawCircle(AtmosColors.LinePrimary, r, c, style = Stroke(1.dp.toPx()))
             }
         }
     )

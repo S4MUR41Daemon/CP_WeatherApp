@@ -12,6 +12,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.atmos.weather.ui.screen.AtmosScreen
+import com.atmos.weather.ui.theme.AtmosColors
+import com.atmos.weather.ui.theme.Palettes
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import com.atmos.weather.ui.viewmodel.AtmosViewModel
 
 class MainActivity : ComponentActivity() {
@@ -22,6 +26,10 @@ class MainActivity : ComponentActivity() {
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(Color.TRANSPARENT)
         )
+
+        // Plantilla guardada antes del primer frame (lectura local de unos ms) para no ver un parpadeo de colores.
+        val prefs = (application as AtmosApp).container.prefs
+        AtmosColors.palette = Palettes.byId(runBlocking { prefs.themeId.first() })
 
         // Misma instancia que obtiene viewModel() dentro de AtmosScreen (mismo ViewModelStore).
         val vm = ViewModelProvider(this, AtmosViewModel.Factory(application))[AtmosViewModel::class.java]

@@ -2,6 +2,8 @@
 <resources>
     <string name="app_name">ATMOS</string>
     <string name="app_tagline">ATMOS//OS</string>
+    <string name="widget_label">ATMOS · Tiempo</string>
+    <string name="widget_description">Temperatura, próximas horas y días con estética neón</string>
     <string name="sync">SYNC</string>
     <string name="city">CIUDAD</string>
     <string name="loading">// ENLAZANDO CON SATÉLITE</string>

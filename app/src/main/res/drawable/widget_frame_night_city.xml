@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Marco neón del widget: resplandor exterior rojo + línea amarilla nítida + fondo casi negro. -->
+<!-- Marco neón del widget: resplandor exterior (secundario) + línea nítida (primario) + fondo casi negro. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
         <shape android:shape="rectangle">

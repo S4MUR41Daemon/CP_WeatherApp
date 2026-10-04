@@ -11,6 +11,8 @@ import com.atmos.weather.data.cache.SavedCity
 import com.atmos.weather.data.repository.WeatherBundle
 import com.atmos.weather.domain.WeatherUi
 import com.atmos.weather.domain.toUi
+import com.atmos.weather.ui.theme.AtmosColors
+import com.atmos.weather.ui.theme.Palettes
 import com.atmos.weather.widget.WidgetUpdater
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -37,6 +39,7 @@ data class UiState(
     /** != 0 mientras dura el glitch de sincronización. */
     val glitchSeed: Int = 0,
     val rainEnabled: Boolean = true,
+    val themeId: String = Palettes.NIGHT_CITY.id,
     val online: Boolean = true,
     val lastFetchTs: Long = 0L
 )
@@ -56,6 +59,13 @@ class AtmosViewModel(app: Application) : AndroidViewModel(app) {
     init {
         viewModelScope.launch {
             container.prefs.rainEnabled.collect { r -> _state.update { it.copy(rainEnabled = r) } }
+        }
+        viewModelScope.launch {
+            container.prefs.themeId.collect { id ->
+                val p = Palettes.byId(id)
+                AtmosColors.palette = p
+                _state.update { it.copy(themeId = p.id) }
+            }
         }
         viewModelScope.launch {
             container.prefs.savedCities.collect { s -> _state.update { it.copy(saved = s) } }
@@ -155,6 +165,16 @@ class AtmosViewModel(app: Application) : AndroidViewModel(app) {
                 ?: _state.value.location ?: DEFAULT_LOCATION
             _state.update { it.copy(location = loc) }
             refresh(loc)
+        }
+    }
+
+    /** Cambia la plantilla: la app se repinta al instante (State) y el widget en segundo plano. */
+    fun setTheme(id: String) {
+        AtmosColors.palette = Palettes.byId(id)
+        _state.update { it.copy(themeId = id) }
+        viewModelScope.launch {
+            container.prefs.setThemeId(id)
+            WidgetUpdater.update(getApplication())
         }
     }
 

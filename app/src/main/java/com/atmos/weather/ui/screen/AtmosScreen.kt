@@ -31,7 +31,7 @@ import com.atmos.weather.ui.components.*
 import com.atmos.weather.ui.sections.*
 import com.atmos.weather.ui.theme.AtmosColors
 import com.atmos.weather.ui.theme.AtmosType
-import com.atmos.weather.ui.theme.ChromaRed
+import com.atmos.weather.ui.theme.ChromaShift
 import com.atmos.weather.ui.viewmodel.AtmosViewModel
 import com.atmos.weather.ui.viewmodel.UiState
 import kotlinx.coroutines.launch
@@ -40,7 +40,7 @@ import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
 
-private val SECTIONS = listOf("AHORA", "HORAS", "14 DÍAS", "VIENTO", "AIRE", "POLEN", "SOL/LUNA", "RADAR")
+private val SECTIONS = listOf("AHORA", "HORAS", "14 DÍAS", "VIENTO", "AIRE", "POLEN", "SOL/LUNA", "RADAR", "AJUSTES")
 
 /** Índice del primer panel de sección dentro del LazyColumn (cabecera, nav y avisos van antes). */
 private const val FIRST_SECTION_INDEX = 3
@@ -95,7 +95,8 @@ fun AtmosScreen(vm: AtmosViewModel) {
                 item(key = "sun") { SectionSunMoon(w.sunMoon) }
                 item(key = "radar") { SectionRadar(w.radar, s.location) }
             }
-            item(key = "footer") { Footer(s.online, s.lastFetchTs, s.rainEnabled, vm::setRainEnabled) }
+            item(key = "settings") { SectionSettings(s.themeId, vm::setTheme, s.rainEnabled, vm::setRainEnabled) }
+            item(key = "footer") { Footer(s.online, s.lastFetchTs) }
         }
 
         ScanlineOverlay(Modifier.fillMaxSize())
@@ -132,7 +133,7 @@ private fun HeroHeader(
                 Box(
                     Modifier
                         .clip(CutCornerShape(topStart = 6.dp))
-                        .background(AtmosColors.Red)
+                        .background(AtmosColors.Secondary)
                         .padding(horizontal = 6.dp, vertical = 1.dp)
                 ) { Text("ATMOS//OS", style = AtmosType.label.copy(color = AtmosColors.Bg)) }
                 Spacer(Modifier.width(8.dp))
@@ -142,7 +143,7 @@ private fun HeroHeader(
                     loc.manual -> "UBICACIÓN MANUAL"
                     else -> "SIN GPS · POR DEFECTO"
                 }
-                Box(Modifier.size(6.dp).background(if (loc?.gps == true) AtmosColors.Cyan else AtmosColors.Yellow))
+                Box(Modifier.size(6.dp).background(if (loc?.gps == true) AtmosColors.Data else AtmosColors.Primary))
                 Spacer(Modifier.width(6.dp))
                 Text(gpsLbl, style = AtmosType.label.copy(color = AtmosColors.Muted))
                 Spacer(Modifier.weight(1f))
@@ -156,17 +157,17 @@ private fun HeroHeader(
             Spacer(Modifier.height(14.dp))
             Text(
                 loc?.name?.uppercase() ?: "LOCALIZANDO…",
-                style = AtmosType.city.copy(color = AtmosColors.Yellow, shadow = ChromaRed),
+                style = AtmosType.city.copy(color = AtmosColors.Primary, shadow = ChromaShift),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )
             if (loc != null && loc.region.isNotEmpty()) {
                 Spacer(Modifier.height(2.dp))
-                Text(loc.region.uppercase(), style = AtmosType.label.copy(color = AtmosColors.RedSoft))
+                Text(loc.region.uppercase(), style = AtmosType.label.copy(color = AtmosColors.SecondarySoft))
             }
             Spacer(Modifier.height(14.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                CyberButton("⌖ CIUDAD", color = AtmosColors.Red, onClick = onCity)
+                CyberButton("⌖ CIUDAD", color = AtmosColors.Secondary, onClick = onCity)
                 CyberButton(if (loading) "SYNC ···" else "⟳ SYNC", filled = true, onClick = onSync)
             }
         }
@@ -184,7 +185,7 @@ private fun SectionNav(active: Int, enabled: Boolean, onPick: (Int) -> Unit) {
             .fillMaxWidth()
             .background(AtmosColors.Bg)
             .drawBehind {
-                drawLine(AtmosColors.LineR, Offset(0f, size.height - 1f), Offset(size.width, size.height - 1f), 1.dp.toPx())
+                drawLine(AtmosColors.LineSecondary, Offset(0f, size.height - 1f), Offset(size.width, size.height - 1f), 1.dp.toPx())
             }
             .padding(vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -195,8 +196,8 @@ private fun SectionNav(active: Int, enabled: Boolean, onPick: (Int) -> Unit) {
             Box(
                 Modifier
                     .clip(shape)
-                    .background(if (on) AtmosColors.Yellow else AtmosColors.Panel)
-                    .border(1.dp, if (on) AtmosColors.Yellow else AtmosColors.LineR, shape)
+                    .background(if (on) AtmosColors.Primary else AtmosColors.Panel)
+                    .border(1.dp, if (on) AtmosColors.Primary else AtmosColors.LineSecondary, shape)
                     .clickable(enabled = enabled) { onPick(i) }
                     .padding(horizontal = 12.dp, vertical = 7.dp)
             ) {
@@ -210,58 +211,43 @@ private fun SectionNav(active: Int, enabled: Boolean, onPick: (Int) -> Unit) {
 private fun StatusBand(alerts: List<String>?, online: Boolean, loading: Boolean) {
     if (alerts.isNullOrEmpty()) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            Box(Modifier.size(8.dp).background(if (online) AtmosColors.Cyan else AtmosColors.Red))
+            Box(Modifier.size(8.dp).background(if (online) AtmosColors.Data else AtmosColors.Warn))
             Spacer(Modifier.width(8.dp))
             val txt = when {
                 loading && alerts == null -> "ESTABLECIENDO ENLACE…"
                 !online -> "SIN RED · MOSTRANDO CACHÉ"
                 else -> "SISTEMA NOMINAL // SIN AVISOS ACTIVOS"
             }
-            Text(txt, style = AtmosType.label.copy(color = if (online) AtmosColors.Muted else AtmosColors.RedSoft))
+            Text(txt, style = AtmosType.label.copy(color = if (online) AtmosColors.Muted else AtmosColors.Warn))
         }
         return
     }
-    Column(Modifier.fillMaxWidth().neonFrame(AtmosColors.Red, cut = 12.dp, fill = AtmosColors.Red.copy(alpha = 0.08f))) {
-        Box(Modifier.fillMaxWidth().height(8.dp).hazardStripes(AtmosColors.Red.copy(alpha = 0.7f)))
+    Column(Modifier.fillMaxWidth().neonFrame(AtmosColors.Warn, cut = 12.dp, fill = AtmosColors.Warn.copy(alpha = 0.08f), accent = AtmosColors.Primary)) {
+        Box(Modifier.fillMaxWidth().height(8.dp).hazardStripes(AtmosColors.Warn.copy(alpha = 0.7f)))
         Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("⚠ AVISO // NCPD WEATHER ALERT", style = AtmosType.label.copy(color = AtmosColors.Yellow))
-            alerts.forEach { Text(it, style = AtmosType.title.copy(color = AtmosColors.Red)) }
+            Text("⚠ AVISO // NCPD WEATHER ALERT", style = AtmosType.label.copy(color = AtmosColors.Primary))
+            alerts.forEach { Text(it, style = AtmosType.title.copy(color = AtmosColors.Warn)) }
         }
     }
 }
 
 @Composable
 private fun LoadingPanel(loading: Boolean) {
-    NeonPanel("00", "ENLACE", color = AtmosColors.Yellow) {
+    NeonPanel("00", "ENLACE", color = AtmosColors.Primary) {
         Text(
             if (loading) "// ENLAZANDO CON SATÉLITE…" else "// SIN DATOS. PULSA SYNC O ELIGE CIUDAD",
             style = AtmosType.mono.copy(color = AtmosColors.Muted)
         )
         Spacer(Modifier.height(10.dp))
-        SegBar(12, if (loading) 7 else 0, AtmosColors.Yellow)
+        SegBar(12, if (loading) 7 else 0, AtmosColors.Primary)
     }
 }
 
 @Composable
-private fun Footer(online: Boolean, lastFetchTs: Long, rainEnabled: Boolean, onRain: (Boolean) -> Unit) {
+private fun Footer(online: Boolean, lastFetchTs: Long) {
     val label = if (online) "DATOS EN VIVO" else "SIN RED"
     val time = if (lastFetchTs > 0) SimpleDateFormat("HH:mm", Locale("es")).format(Date(lastFetchTs)) else "--:--"
-    Column(Modifier.fillMaxWidth().padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text("LLUVIA DIGITAL", style = AtmosType.label.copy(color = AtmosColors.Muted))
-            Spacer(Modifier.width(10.dp))
-            val shape = CutCornerShape(topStart = 5.dp, bottomEnd = 5.dp)
-            Box(
-                Modifier
-                    .clip(shape)
-                    .background(if (rainEnabled) AtmosColors.Yellow else AtmosColors.Panel)
-                    .border(1.dp, if (rainEnabled) AtmosColors.Yellow else AtmosColors.LineR, shape)
-                    .clickable { onRain(!rainEnabled) }
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
-            ) {
-                Text(if (rainEnabled) "ON" else "OFF", style = AtmosType.label.copy(color = if (rainEnabled) AtmosColors.Bg else AtmosColors.Text))
-            }
-        }
+    Column(Modifier.fillMaxWidth().padding(top = 8.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text("ATMOS//OS v2 · OPEN-METEO · RAINVIEWER · © OSM", style = AtmosType.label.copy(color = AtmosColors.Dim))
         Text("$label · SYNC $time", style = AtmosType.label.copy(color = AtmosColors.Muted))
     }
@@ -277,16 +263,16 @@ private fun LocationSheet(s: UiState, vm: AtmosViewModel) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        SectionHeader("⌖", "UBICACIONES", AtmosColors.Red)
+        SectionHeader("⌖", "UBICACIONES", AtmosColors.Secondary)
         BasicTextField(
             value = s.query,
             onValueChange = vm::onQueryChanged,
             textStyle = AtmosType.monoBig.copy(color = AtmosColors.Text),
-            cursorBrush = SolidColor(AtmosColors.Yellow),
+            cursorBrush = SolidColor(AtmosColors.Primary),
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .neonFrame(AtmosColors.Yellow, cut = 10.dp, fill = AtmosColors.Bg)
+                .neonFrame(AtmosColors.Primary, cut = 10.dp, fill = AtmosColors.Bg)
                 .padding(horizontal = 14.dp, vertical = 12.dp),
             decorationBox = { inner ->
                 Box {
@@ -297,14 +283,14 @@ private fun LocationSheet(s: UiState, vm: AtmosViewModel) {
         )
         CyberButton("⌖ USAR MI UBICACIÓN (GPS)", Modifier.fillMaxWidth(), filled = true, onClick = vm::useGps)
 
-        if (s.searching) Text("// CONSULTANDO RED…", style = AtmosType.label.copy(color = AtmosColors.Cyan))
+        if (s.searching) Text("// CONSULTANDO RED…", style = AtmosType.label.copy(color = AtmosColors.Data))
         else if (s.query.trim().length >= 2 && s.results.isEmpty()) Text("SIN RESULTADOS", style = AtmosType.label.copy(color = AtmosColors.Muted))
 
         s.results.forEach { r ->
             CityRow(r.name, listOfNotNull(r.admin1, r.country).joinToString(" · "), onClick = { vm.pickGeo(r) })
         }
         if (s.saved.isNotEmpty()) {
-            Text("CIUDADES GUARDADAS", style = AtmosType.label.copy(color = AtmosColors.RedSoft))
+            Text("CIUDADES GUARDADAS", style = AtmosType.label.copy(color = AtmosColors.SecondarySoft))
             s.saved.forEach { c ->
                 CityRow(c.name, c.region, onClick = { vm.pickLocation(c) }, onRemove = { vm.removeSaved(c) })
             }
@@ -319,7 +305,7 @@ private fun CityRow(name: String, region: String, onClick: () -> Unit, onRemove:
         Modifier
             .fillMaxWidth()
             .background(AtmosColors.PanelHi)
-            .drawBehind { drawRect(AtmosColors.Yellow, Offset.Zero, androidx.compose.ui.geometry.Size(2.dp.toPx(), size.height)) }
+            .drawBehind { drawRect(AtmosColors.Primary, Offset.Zero, androidx.compose.ui.geometry.Size(2.dp.toPx(), size.height)) }
             .clickable(onClick = onClick)
             .padding(start = 12.dp, top = 8.dp, bottom = 8.dp, end = 4.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -330,7 +316,7 @@ private fun CityRow(name: String, region: String, onClick: () -> Unit, onRemove:
         }
         if (onRemove != null) {
             Box(Modifier.clickable(onClick = onRemove).padding(horizontal = 12.dp, vertical = 6.dp)) {
-                Text("✕", style = AtmosType.title.copy(color = AtmosColors.Red))
+                Text("✕", style = AtmosType.title.copy(color = AtmosColors.Secondary))
             }
         }
     }

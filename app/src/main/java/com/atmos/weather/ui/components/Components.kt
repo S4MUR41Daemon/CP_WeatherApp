@@ -81,14 +81,14 @@ fun NeonPanel(
     number: String,
     title: String,
     modifier: Modifier = Modifier,
-    color: Color = AtmosColors.Red,
+    color: Color = AtmosColors.Secondary,
     trailing: String? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
         modifier
             .fillMaxWidth()
-            .neonFrame(color, accent = if (color == AtmosColors.Red) AtmosColors.Yellow else AtmosColors.Red)
+            .neonFrame(color, accent = if (color == AtmosColors.Secondary) AtmosColors.Primary else AtmosColors.Secondary)
             .padding(start = 16.dp, end = 16.dp, top = 14.dp, bottom = 18.dp)
     ) {
         SectionHeader(number, title, color, trailing)
@@ -97,7 +97,7 @@ fun NeonPanel(
 }
 
 @Composable
-fun SectionHeader(number: String, title: String, color: Color = AtmosColors.Red, trailing: String? = null) {
+fun SectionHeader(number: String, title: String, color: Color = AtmosColors.Secondary, trailing: String? = null) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
@@ -105,7 +105,7 @@ fun SectionHeader(number: String, title: String, color: Color = AtmosColors.Red,
         Box(
             Modifier
                 .clip(CutCornerShape(topStart = 6.dp))
-                .background(AtmosColors.Yellow)
+                .background(AtmosColors.Primary)
                 .padding(start = 8.dp, end = 6.dp, top = 1.dp, bottom = 1.dp)
         ) {
             Text(number, style = AtmosType.label.copy(color = AtmosColors.Bg))
@@ -126,13 +126,13 @@ fun SectionHeader(number: String, title: String, color: Color = AtmosColors.Red,
                 }
         )
         if (trailing != null) {
-            Text(trailing, style = AtmosType.label.copy(color = AtmosColors.RedSoft))
+            Text(trailing, style = AtmosType.label.copy(color = AtmosColors.SecondarySoft))
         }
     }
 }
 
 @Composable
-fun CodeChip(code: String, color: Color = AtmosColors.Cyan, modifier: Modifier = Modifier) {
+fun CodeChip(code: String, color: Color = AtmosColors.Data, modifier: Modifier = Modifier) {
     Box(
         modifier
             .drawWithCache {
@@ -153,7 +153,7 @@ fun CyberButton(
     text: String,
     modifier: Modifier = Modifier,
     filled: Boolean = false,
-    color: Color = AtmosColors.Yellow,
+    color: Color = AtmosColors.Primary,
     onClick: () -> Unit
 ) {
     val shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp)
@@ -174,7 +174,7 @@ fun CyberButton(
 fun SegBar(
     total: Int,
     filled: Int,
-    color: Color = AtmosColors.Yellow,
+    color: Color = AtmosColors.Primary,
     modifier: Modifier = Modifier,
     height: Dp = 6.dp,
     segmentColors: List<Color>? = null
@@ -196,7 +196,7 @@ fun SegBar(
 
 /** Celda de dato con barra de acento lateral (menos ruido visual que un borde completo). */
 @Composable
-fun StatCell(label: String, value: String, modifier: Modifier = Modifier, accent: Color = AtmosColors.Yellow) {
+fun StatCell(label: String, value: String, modifier: Modifier = Modifier, accent: Color = AtmosColors.Primary) {
     Column(
         modifier
             .background(AtmosColors.PanelHi)
@@ -233,10 +233,10 @@ fun GlitchOverlay(seed: Int, modifier: Modifier = Modifier) {
             val y = rnd.nextFloat() * size.height
             val h = 3.dp.toPx() + rnd.nextFloat() * 18.dp.toPx()
             val x = (rnd.nextFloat() - 0.5f) * 60.dp.toPx()
-            val c = if (rnd.nextBoolean()) AtmosColors.Red else AtmosColors.Cyan
+            val c = if (rnd.nextBoolean()) AtmosColors.Secondary else AtmosColors.Data
             drawRect(c.copy(alpha = 0.35f), Offset(x, y), Size(size.width, h), blendMode = BlendMode.Screen)
         }
-        drawRect(AtmosColors.Yellow.copy(alpha = 0.06f))
+        drawRect(AtmosColors.Primary.copy(alpha = 0.06f))
     }
 }
 

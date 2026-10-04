@@ -39,9 +39,8 @@ val ShareTechMono = FontFamily(
     Font(googleFont = mono, fontProvider = provider, weight = FontWeight.Normal)
 )
 
-/** Sombra desplazada en rojo = aberración cromática barata (sin blur, sin capas extra). */
-val ChromaRed = Shadow(color = AtmosColors.Red, offset = Offset(4f, 0f), blurRadius = 0f)
-val ChromaCyan = Shadow(color = AtmosColors.Cyan.copy(alpha = 0.7f), offset = Offset(-3f, 0f), blurRadius = 0f)
+/** Sombra desplazada en el color secundario = aberración cromática barata (sin blur, sin capas extra). */
+val ChromaShift: Shadow get() = Shadow(color = AtmosColors.Secondary, offset = Offset(4f, 0f), blurRadius = 0f)
 
 object AtmosType {
     val city = TextStyle(fontFamily = Rajdhani, fontWeight = FontWeight.Bold, fontSize = 40.sp, letterSpacing = 0.04.em, lineHeight = 40.sp)

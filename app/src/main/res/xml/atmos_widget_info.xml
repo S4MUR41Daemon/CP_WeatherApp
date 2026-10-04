@@ -13,4 +13,4 @@
     android:previewLayout="@layout/widget_preview"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"
-    android:description="@string/app_tagline" />
+    android:description="@string/widget_description" />
