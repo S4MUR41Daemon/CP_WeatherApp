@@ -1,5 +1,7 @@
 package com.atmos.weather.ui.theme
 
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -16,6 +18,7 @@ private val provider = GoogleFont.Provider(
 )
 
 private val chakra = GoogleFont("Chakra Petch")
+private val rajdhani = GoogleFont("Rajdhani")
 private val mono = GoogleFont("Share Tech Mono")
 
 val ChakraPetch = FontFamily(
@@ -25,16 +28,29 @@ val ChakraPetch = FontFamily(
     Font(googleFont = chakra, fontProvider = provider, weight = FontWeight.Bold)
 )
 
+/** Rajdhani: condensada y angulosa, muy cercana a la tipografía de los menús de Cyberpunk 2077. */
+val Rajdhani = FontFamily(
+    Font(googleFont = rajdhani, fontProvider = provider, weight = FontWeight.Medium),
+    Font(googleFont = rajdhani, fontProvider = provider, weight = FontWeight.SemiBold),
+    Font(googleFont = rajdhani, fontProvider = provider, weight = FontWeight.Bold)
+)
+
 val ShareTechMono = FontFamily(
     Font(googleFont = mono, fontProvider = provider, weight = FontWeight.Normal)
 )
 
+/** Sombra desplazada en rojo = aberración cromática barata (sin blur, sin capas extra). */
+val ChromaRed = Shadow(color = AtmosColors.Red, offset = Offset(4f, 0f), blurRadius = 0f)
+val ChromaCyan = Shadow(color = AtmosColors.Cyan.copy(alpha = 0.7f), offset = Offset(-3f, 0f), blurRadius = 0f)
+
 object AtmosType {
-    val city = TextStyle(fontFamily = ChakraPetch, fontWeight = FontWeight.Bold, fontSize = 32.sp, letterSpacing = 0.02.em)
-    val tempBig = TextStyle(fontFamily = ChakraPetch, fontWeight = FontWeight.SemiBold, fontSize = 108.sp, letterSpacing = (-0.05).em)
-    val title = TextStyle(fontFamily = ChakraPetch, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, letterSpacing = 0.18.em)
+    val city = TextStyle(fontFamily = Rajdhani, fontWeight = FontWeight.Bold, fontSize = 40.sp, letterSpacing = 0.04.em, lineHeight = 40.sp)
+    val tempBig = TextStyle(fontFamily = Rajdhani, fontWeight = FontWeight.Bold, fontSize = 112.sp, letterSpacing = (-0.03).em, lineHeight = 104.sp)
+    val title = TextStyle(fontFamily = Rajdhani, fontWeight = FontWeight.Bold, fontSize = 17.sp, letterSpacing = 0.16.em)
+    val button = TextStyle(fontFamily = Rajdhani, fontWeight = FontWeight.Bold, fontSize = 15.sp, letterSpacing = 0.2.em)
     val body = TextStyle(fontFamily = ChakraPetch, fontWeight = FontWeight.Normal, fontSize = 13.sp)
-    val numMedium = TextStyle(fontFamily = ChakraPetch, fontWeight = FontWeight.Medium, fontSize = 16.sp)
+    val numMedium = TextStyle(fontFamily = ChakraPetch, fontWeight = FontWeight.SemiBold, fontSize = 17.sp)
+    val numLarge = TextStyle(fontFamily = Rajdhani, fontWeight = FontWeight.Bold, fontSize = 30.sp, lineHeight = 30.sp)
     val label = TextStyle(fontFamily = ShareTechMono, fontSize = 10.sp, letterSpacing = 0.12.em)
     val mono = TextStyle(fontFamily = ShareTechMono, fontSize = 12.sp)
     val monoBig = TextStyle(fontFamily = ShareTechMono, fontSize = 14.sp)

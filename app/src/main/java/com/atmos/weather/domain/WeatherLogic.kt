@@ -55,6 +55,16 @@ fun pollenLevel(v: Double?): String = when {
     else -> "MUY ALTO"
 }
 
+/** Nivel de polen 0..4 (NULO..MUY ALTO), -1 si no hay dato. */
+fun pollenIndex(v: Double?): Int = when {
+    v == null -> -1
+    v < 1 -> 0
+    v < 20 -> 1
+    v < 50 -> 2
+    v < 150 -> 3
+    else -> 4
+}
+
 fun pollenWidthPct(v: Double?): Int =
     if (v == null) 0 else min(100.0, v / 150.0 * 100.0).toInt()
 
@@ -66,7 +76,7 @@ fun uvLabel(uv: Double): String = when {
     else -> "EXTR."
 }
 
-data class MoonInfo(val name: String, val illumination: Int, val daysToFull: Int, val shadowOffset: Int)
+data class MoonInfo(val name: String, val illumination: Int, val daysToFull: Int, val shadowOffset: Int, val phase: Double = 0.0)
 
 fun moon(nowMs: Long = System.currentTimeMillis()): MoonInfo {
     val syn = 29.530588853
@@ -88,7 +98,7 @@ fun moon(nowMs: Long = System.currentTimeMillis()): MoonInfo {
     }
     val toFull = (((0.5 - mp + 1) % 1) * syn).roundToInt()
     val shadow = ((1 - illum) * 56 * (if (mp < 0.5) 1 else -1)).roundToInt()
-    return MoonInfo(name, (illum * 100).roundToInt(), toFull, shadow)
+    return MoonInfo(name, (illum * 100).roundToInt(), toFull, shadow, mp)
 }
 
 data class SunArc(val x: Double, val y: Double)
@@ -101,7 +111,8 @@ fun sunArc(nowMinutes: Int, riseMinutes: Int, setMinutes: Int): SunArc {
     return SunArc(x, y)
 }
 
-fun toMin(iso: String): Int = iso.substring(11, 13).toInt() * 60 + iso.substring(14, 16).toInt()
+fun toMin(iso: String): Int =
+    if (iso.length < 16) 0 else iso.substring(11, 13).toInt() * 60 + iso.substring(14, 16).toInt()
 
 fun hhmm(seconds: Int): String {
     val h = seconds / 3600
@@ -124,7 +135,7 @@ fun computeAlerts(
     if (uvMax >= 8) list += "ÍNDICE UV MUY ALTO · ${uvMax.roundToInt()}"
     if (tMax >= 38) list += "CALOR EXTREMO · ${tMax.roundToInt()}°"
     if (tMin <= -2) list += "HELADA · ${tMin.roundToInt()}°"
-    if (precipSumMm >= 20) list += "LLUVIA INTENSA · $precipSumMm MM"
+    if (precipSumMm >= 20) list += "LLUVIA INTENSA · ${precipSumMm.roundToInt()} MM"
     return list
 }
 

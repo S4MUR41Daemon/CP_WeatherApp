@@ -6,6 +6,8 @@ import com.atmos.weather.data.api.OpenMeteoClient
 import com.atmos.weather.data.api.RainViewerResponse
 import com.atmos.weather.data.cache.SavedCity
 import com.atmos.weather.data.cache.WeatherCache
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -25,23 +27,36 @@ class WeatherRepository(
     private val client: OpenMeteoClient,
     private val cache: WeatherCache
 ) {
-    private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+    private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true; coerceInputValues = true }
 
     suspend fun loadCached(): CachedBundle? {
         val e = cache.read() ?: return null
-        return try {
-            val b = json.decodeFromString<WeatherBundle>(e.json)
-            val l = json.decodeFromString<SavedCity>(e.locJson)
-            CachedBundle(b, l)
-        } catch (_: Throwable) { null }
+        return withContext(Dispatchers.Default) {
+            try {
+                CachedBundle(json.decodeFromString<WeatherBundle>(e.json), json.decodeFromString<SavedCity>(e.locJson))
+            } catch (_: Throwable) { null }
+        }
     }
 
+    /**
+     * Pide datos nuevos. Si la red falla y había caché para la misma ubicación, devuelve la caché
+     * (así la UI nunca se queda vacía por un corte de red) y no la sobrescribe.
+     */
     suspend fun refresh(loc: SavedCity): WeatherBundle {
         val (f, a, r) = client.fetchAll(loc.lat, loc.lon)
-        val bundle = WeatherBundle(f, a, r, System.currentTimeMillis(), fromMock = f?.current == null)
+        if (f?.current == null) {
+            val old = loadCached()
+            if (old != null && old.location.sameAs(loc)) return old.bundle
+            return WeatherBundle(f, a, r, 0L, fromMock = true)
+        }
+        val bundle = WeatherBundle(f, a, r, System.currentTimeMillis())
         try {
-            cache.write(json.encodeToString(bundle), json.encodeToString(loc))
+            val (bj, lj) = withContext(Dispatchers.Default) { json.encodeToString(bundle) to json.encodeToString(loc) }
+            cache.write(bj, lj)
         } catch (_: Throwable) {}
         return bundle
     }
 }
+
+fun SavedCity.sameAs(o: SavedCity): Boolean =
+    kotlin.math.abs(lat - o.lat) < 0.01 && kotlin.math.abs(lon - o.lon) < 0.01

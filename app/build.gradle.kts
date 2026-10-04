@@ -13,8 +13,8 @@ android {
         applicationId = "com.atmos.weather"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = 2
+        versionName = "2.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables { useSupportLibrary = true }
     }
@@ -73,10 +73,10 @@ dependencies {
     implementation(libs.coroutines.play.services)
     implementation(libs.serialization.json)
 
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.okhttp)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.okhttp)
+    implementation(libs.profileinstaller)
+    // Play Services arrastra un Fragment < 1.3 incompatible con la API ActivityResult.
+    implementation(libs.fragment)
 
     implementation(libs.datastore.preferences)
     implementation(libs.work.runtime.ktx)

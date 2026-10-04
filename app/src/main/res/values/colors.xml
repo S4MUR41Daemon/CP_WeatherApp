@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="atmos_bg">#FF08080A</color>
-    <color name="atmos_panel">#FF121214</color>
+    <color name="atmos_bg">#FF060608</color>
+    <color name="atmos_panel">#FF0E0C10</color>
     <color name="atmos_accent">#FFFCEE0A</color>
-    <color name="atmos_accent2">#FF00E5FF</color>
-    <color name="atmos_text">#FFF4F1E1</color>
-    <color name="atmos_muted">#FF9B9888</color>
-    <color name="atmos_warn">#FFFF1F4B</color>
+    <color name="atmos_accent2">#FF02D7F2</color>
+    <color name="atmos_text">#FFF2EEDC</color>
+    <color name="atmos_muted">#FF8C887C</color>
+    <color name="atmos_warn">#FFFF003C</color>
 </resources>

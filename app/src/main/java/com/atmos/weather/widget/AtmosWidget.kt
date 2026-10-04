@@ -1,87 +1,169 @@
 package com.atmos.weather.widget
 
 import android.content.Context
-import android.content.Intent
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.ImageProvider
+import androidx.glance.LocalSize
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.provideContent
+import androidx.glance.appwidget.updateAll
 import androidx.glance.background
-import androidx.glance.layout.Alignment
-import androidx.glance.layout.Column
-import androidx.glance.layout.Row
-import androidx.glance.layout.Spacer
-import androidx.glance.layout.fillMaxSize
-import androidx.glance.layout.fillMaxWidth
-import androidx.glance.layout.height
-import androidx.glance.layout.padding
-import androidx.glance.layout.width
+import androidx.glance.layout.*
+import androidx.glance.text.FontFamily
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
+import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import androidx.compose.ui.graphics.Color
 import com.atmos.weather.AtmosApp
 import com.atmos.weather.MainActivity
-import com.atmos.weather.domain.wmo
-import kotlin.math.roundToInt
+import com.atmos.weather.R
+import com.atmos.weather.domain.WeatherUi
+import com.atmos.weather.domain.toUi
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+private val C_TEXT = ColorProvider(Color(0xFFF2EEDC))
+private val C_YELLOW = ColorProvider(Color(0xFFFCEE0A))
+private val C_RED = ColorProvider(Color(0xFFFF4D6D))
+private val C_CYAN = ColorProvider(Color(0xFF02D7F2))
+private val C_MUTED = ColorProvider(Color(0xFF8C887C))
+private val LINE_RED = Color(0x80FF003C)
+
+private val SMALL = DpSize(160.dp, 60.dp)
+private val MEDIUM = DpSize(250.dp, 110.dp)
+private val LARGE = DpSize(250.dp, 220.dp)
+
+object WidgetUpdater {
+    suspend fun update(context: Context) {
+        try { AtmosWidget().updateAll(context) } catch (_: Throwable) {}
+    }
+}
 
 class AtmosWidget : GlanceAppWidget() {
+
+    override val sizeMode: SizeMode = SizeMode.Responsive(setOf(SMALL, MEDIUM, LARGE))
+
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val app = context.applicationContext as AtmosApp
         val cached = app.container.repository.loadCached()
-        provideContent { Content(cached) }
+        val ui = cached?.bundle?.toUi()
+        val city = cached?.location?.name?.uppercase() ?: "ATMOS//OS"
+        val sync = cached?.bundle?.fetchedAt?.takeIf { it > 0 }
+            ?.let { SimpleDateFormat("HH:mm", Locale("es")).format(Date(it)) } ?: "--:--"
+        provideContent { Content(ui, city, sync) }
     }
 
     @Composable
-    private fun Content(cached: com.atmos.weather.data.repository.CachedBundle?) {
-        val bg = ColorProvider(Color(0xDD08080A))
-        val accent = ColorProvider(Color(0xFFFCEE0A))
-        val accent2 = ColorProvider(Color(0xFF00E5FF))
-        val textCol = ColorProvider(Color(0xFFF4F1E1))
-        val muted = ColorProvider(Color(0xFF9B9888))
-        val cur = cached?.bundle?.forecast?.current
-        val daily = cached?.bundle?.forecast?.daily
-        val city = cached?.location?.name?.uppercase() ?: "ATMOS//OS"
-
+    private fun Content(ui: WeatherUi?, city: String, sync: String) {
+        val size = LocalSize.current
         Column(
-            modifier = GlanceModifier.fillMaxSize().background(bg).padding(10.dp)
-                .clickable(actionStartActivity<MainActivity>())
+            modifier = GlanceModifier
+                .fillMaxSize()
+                .background(ImageProvider(R.drawable.widget_frame))
+                .padding(horizontal = 14.dp, vertical = 10.dp)
+                .clickable(actionStartActivity<MainActivity>()),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = GlanceModifier.fillMaxWidth()) {
-                Text(cur?.temperature?.roundToInt()?.toString() ?: "--", style = TextStyle(fontSize = 44.sp, fontWeight = FontWeight.Bold, color = textCol))
-                Text("°C", style = TextStyle(fontSize = 14.sp, color = accent))
-                Spacer(GlanceModifier.width(10.dp))
-                Column {
-                    val code = cur?.let { wmo(it.code).code } ?: "---"
-                    Text(code, style = TextStyle(fontSize = 11.sp, color = accent2))
-                    Text(city, style = TextStyle(fontSize = 12.sp, color = accent, fontWeight = FontWeight.Bold))
-                    if (daily != null) {
-                        Text("↑${daily.tmax[0].roundToInt()}° ↓${daily.tmin[0].roundToInt()}°", style = TextStyle(fontSize = 10.sp, color = muted))
+            if (ui == null) {
+                Text("ATMOS//OS", style = TextStyle(color = C_YELLOW, fontSize = 16.sp, fontWeight = FontWeight.Bold))
+                Text("SIN DATOS · ABRE LA APP", style = mono(C_MUTED, 10))
+                return@Column
+            }
+            Header(ui, city, sync, compact = size.height < MEDIUM.height)
+            if (size.height >= MEDIUM.height) {
+                Spacer(GlanceModifier.defaultWeight())
+                Divider()
+                Spacer(GlanceModifier.height(6.dp))
+                Hours(ui)
+            }
+            if (size.height >= LARGE.height && ui.days.size > 1) {
+                Spacer(GlanceModifier.defaultWeight())
+                Divider()
+                Spacer(GlanceModifier.height(4.dp))
+                Days(ui)
+            }
+        }
+    }
+
+    @Composable
+    private fun Header(ui: WeatherUi, city: String, sync: String, compact: Boolean) {
+        val n = ui.now
+        Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                "${n.temp}°",
+                style = TextStyle(color = C_TEXT, fontSize = if (compact) 34.sp else 46.sp, fontWeight = FontWeight.Bold)
+            )
+            Spacer(GlanceModifier.width(10.dp))
+            Column(modifier = GlanceModifier.defaultWeight()) {
+                Text("[${n.code}] ${n.label}", style = mono(C_CYAN, 11), maxLines = 1)
+                Text(city, style = TextStyle(color = C_YELLOW, fontSize = 16.sp, fontWeight = FontWeight.Bold), maxLines = 1)
+                if (!compact) {
+                    Row {
+                        Text("▲${n.hi}°", style = mono(C_RED, 11))
+                        Spacer(GlanceModifier.width(6.dp))
+                        Text("▼${n.lo}°", style = mono(C_CYAN, 11))
+                        Spacer(GlanceModifier.width(6.dp))
+                        Text("☂${ui.hours.firstOrNull()?.prob ?: 0}%", style = mono(C_MUTED, 11))
                     }
                 }
             }
-            Spacer(GlanceModifier.height(6.dp))
-            val hourly = cached?.bundle?.forecast?.hourly
-            if (hourly != null) {
-                Row(modifier = GlanceModifier.fillMaxWidth()) {
-                    for (i in 0 until minOf(6, hourly.time.size)) {
-                        Column(modifier = GlanceModifier.padding(horizontal = 2.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(if (i == 0) "YA" else hourly.time[i].substring(11, 13), style = TextStyle(fontSize = 9.sp, color = muted))
-                            Text("${hourly.temperature[i].roundToInt()}°", style = TextStyle(fontSize = 11.sp, color = textCol))
-                            Text("${(hourly.precipProb.getOrNull(i) ?: 0.0).roundToInt()}%", style = TextStyle(fontSize = 9.sp, color = accent2))
-                        }
-                    }
+            if (!compact) {
+                Column(horizontalAlignment = Alignment.End) {
+                    Text("ATMOS//OS", style = mono(C_RED, 9))
+                    Text("SYNC $sync", style = mono(C_MUTED, 9))
                 }
             }
         }
     }
+
+    @Composable
+    private fun Divider() {
+        Box(GlanceModifier.fillMaxWidth().height(1.dp).background(LINE_RED)) {}
+    }
+
+    @Composable
+    private fun Hours(ui: WeatherUi) {
+        val hours = ui.hours.filterIndexed { i, _ -> i % 2 == 0 }.take(6)
+        Row(modifier = GlanceModifier.fillMaxWidth()) {
+            hours.forEachIndexed { i, h ->
+                Column(modifier = GlanceModifier.defaultWeight(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(h.label, style = mono(if (i == 0) C_YELLOW else C_MUTED, 10, TextAlign.Center))
+                    Text("${Math.round(h.temp)}°", style = TextStyle(color = C_TEXT, fontSize = 14.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center))
+                    Text("${h.prob}%", style = mono(if (h.prob > 0) C_CYAN else C_MUTED, 10, TextAlign.Center))
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun Days(ui: WeatherUi) {
+        Column(modifier = GlanceModifier.fillMaxWidth()) {
+            ui.days.drop(1).take(4).forEach { d ->
+                Row(modifier = GlanceModifier.fillMaxWidth().padding(vertical = 1.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text(d.weekday, style = mono(C_TEXT, 11), modifier = GlanceModifier.width(40.dp))
+                    Text(d.code, style = mono(C_CYAN, 11), modifier = GlanceModifier.defaultWeight())
+                    Text("${d.prob}%", style = mono(C_MUTED, 11), modifier = GlanceModifier.width(40.dp))
+                    Text("${d.tmin}°", style = mono(C_CYAN, 11), modifier = GlanceModifier.width(32.dp))
+                    Text("${d.tmax}°", style = mono(C_RED, 11), modifier = GlanceModifier.width(32.dp))
+                }
+            }
+        }
+    }
+
+    private fun mono(c: ColorProvider, size: Int, align: TextAlign = TextAlign.Start) =
+        TextStyle(color = c, fontSize = size.sp, fontFamily = FontFamily.Monospace, textAlign = align)
 }
 
 class AtmosWidgetReceiver : GlanceAppWidgetReceiver() {

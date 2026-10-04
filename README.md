@@ -1,14 +1,27 @@
 # ATMOS//OS
 
-App Android nativa del tiempo (Kotlin + Jetpack Compose) con estética cyberpunk — paleta **2a Night City** del prototipo.
+App Android nativa del tiempo (Kotlin + Jetpack Compose) con estética Cyberpunk 2077: marcos neón biselados
+amarillo/rojo, aberración cromática, glitch al sincronizar y lluvia de datos.
+
+## v2 — cambios principales
+
+- **UI**: paneles con marco neón (glow cacheado en `drawWithCache`), cabeceras `01 // TÍTULO`, botones biselados,
+  barra de secciones fija que resalta la sección visible, avisos con franjas de peligro, luna con fase real,
+  brújula con cardinales, barras de 14 días con gradiente frío→calor.
+- **Rendimiento**: lluvia digital sin medir texto por frame y sin recomposición (solo invalida dibujo),
+  scanlines con un único shader, modelo de UI precalculado fuera del hilo principal, geocoder en IO,
+  Ktor sustituido por OkHttp (compartido con Coil), `profileinstaller` y **APK release minificado en CI**.
+- **Bugs**: la serie horaria empieza en la hora actual (antes en las 00:00), barras de 14 días que se salían,
+  radar sin API key (OSM oscurecido por matriz de color en vez de CARTO), widget responsive que ocupa todo el
+  espacio y se actualiza tras cada SYNC.
 
 ## Qué incluye
 
 - Pantalla única con scroll y 8 secciones: ahora, próximas horas, 14 días, viento, calidad del aire, polen, sol/luna y radar.
 - Lluvia digital propia a 20 fps, reactiva al tiempo real, con pausa por ciclo de vida y modo ahorro de batería.
-- Widget 4x2 (Jetpack Glance) con temperatura, código, ciudad, min/max y fila de 6 horas.
+- Widget Glance responsive (compacto / 4x2 con horas / 4x3+ con 4 días) con marco neón.
 - Caché offline (DataStore) + refresco en segundo plano con WorkManager cada 60 min (`NetworkType.CONNECTED` + `requiresBatteryNotLow`).
-- APIs sin clave: Open-Meteo (forecast + air quality + geocoding), RainViewer (radar) y `android.location.Geocoder` offline.
+- APIs sin clave: Open-Meteo (forecast + air quality + geocoding), RainViewer (radar), teselas OpenStreetMap y `android.location.Geocoder`.
 - Lógica portada 1:1 desde `WeatherApp.dc.html` (`fetchAll`, `renderVals`, umbrales de avisos).
 
 ## Compilar en local
@@ -32,7 +45,9 @@ gradle wrapper --gradle-version 8.9
 
 El workflow `.github/workflows/build-apk.yml` se dispara en push a `main` y manualmente (`workflow_dispatch`). Instala Android SDK, JDK 17, genera el wrapper si falta, ejecuta tests y publica el APK como artifact `atmos-debug`.
 
-Descarga: Actions → Build APK → Artifacts.
+Descarga: Actions → Build APK → Artifacts. **Instala `atmos-release`**: va con R8 y sin modo debug, es bastante
+más fluido que `atmos-debug` (Compose en debug es notablemente más lento). Nota: CI genera una clave debug nueva
+en cada ejecución, así que si Android dice «app no instalada» desinstala la versión anterior primero.
 
 ## Instalar en el móvil
 
@@ -53,8 +68,8 @@ Mantén pulsado en el escritorio → Widgets → ATMOS → arrastra el 4x2.
 
 - Datos meteorológicos: [Open-Meteo](https://open-meteo.com) (CC BY 4.0).
 - Radar: [RainViewer](https://www.rainviewer.com/).
-- Mapa base: © OpenStreetMap, © CARTO (tiles `dark_all`).
-- Fuentes: Chakra Petch y Share Tech Mono (OFL) vía Google Fonts (downloadable fonts).
+- Mapa base: © OpenStreetMap contributors (teselas estándar, oscurecidas en el cliente).
+- Fuentes: Rajdhani, Chakra Petch y Share Tech Mono (OFL) vía Google Fonts (downloadable fonts).
 
 ## Notas
 

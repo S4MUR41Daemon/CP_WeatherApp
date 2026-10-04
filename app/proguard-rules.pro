@@ -4,6 +4,7 @@
 -keepclassmembers class com.atmos.weather.** { *** Companion; }
 -keepclasseswithmembers class com.atmos.weather.** { kotlinx.serialization.KSerializer serializer(...); }
 
-# Ktor
--keep class io.ktor.** { *; }
--keep class kotlinx.coroutines.** { *; }
+# OkHttp trae sus propias reglas; solo silenciamos avisos opcionales de plataformas TLS.
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**

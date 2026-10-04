@@ -8,7 +8,9 @@ import androidx.core.content.ContextCompat
 import com.google.android.gms.location.CurrentLocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
 import java.util.Locale
 
 data class GpsLocation(val lat: Double, val lon: Double, val name: String, val region: String)
@@ -30,7 +32,7 @@ class LocationProvider(private val context: Context) {
                 .setMaxUpdateAgeMillis(15 * 60 * 1000)
                 .build()
             val loc = client.getCurrentLocation(req, null).await() ?: return null
-            val (name, region) = reverseGeocode(loc.latitude, loc.longitude)
+            val (name, region) = withContext(Dispatchers.IO) { reverseGeocode(loc.latitude, loc.longitude) }
             GpsLocation(loc.latitude, loc.longitude, name, region)
         } catch (_: Throwable) { null }
     }

@@ -9,7 +9,6 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import androidx.glance.appwidget.updateAll
 import com.atmos.weather.AtmosApp
 import java.util.concurrent.TimeUnit
 
@@ -19,11 +18,9 @@ class RefreshWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ct
             val app = applicationContext as AtmosApp
             val cached = app.container.repository.loadCached()
             val loc = cached?.location ?: return Result.success()
-            app.container.repository.refresh(loc)
-            try {
-                com.atmos.weather.widget.AtmosWidget().updateAll(applicationContext)
-            } catch (_: Throwable) {}
-            Result.success()
+            val b = app.container.repository.refresh(loc)
+            com.atmos.weather.widget.WidgetUpdater.update(applicationContext)
+            if (b.fromMock) Result.retry() else Result.success()
         } catch (_: Throwable) {
             Result.retry()
         }

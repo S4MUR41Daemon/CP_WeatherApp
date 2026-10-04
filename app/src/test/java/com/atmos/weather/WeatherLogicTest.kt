@@ -35,4 +35,22 @@ class WeatherLogicTest {
         assertTrue(rainIntensity(61, 2.0) > 0.0)
         assertEquals(0.0, rainIntensity(0, 0.0), 0.0001)
     }
+    @Test fun hourlyStartsAtCurrentHour() {
+        val times = (0 until 48).map { "2026-10-04T%02d:00".format(it % 24) }.mapIndexed { i, t ->
+            if (i >= 24) t.replace("10-04", "10-05") else t
+        }
+        assertEquals(13, currentHourIndex(times, "2026-10-04T13:15"))
+        assertEquals(0, currentHourIndex(times, "2026-10-03T23:59"))
+        assertEquals(25, currentHourIndex(times, "2026-10-05T01:00"))
+    }
+    @Test fun pollenIndexLevels() {
+        assertEquals(-1, pollenIndex(null))
+        assertEquals(0, pollenIndex(0.2))
+        assertEquals(4, pollenIndex(500.0))
+    }
+    @Test fun moonPhaseInRange() {
+        val m = moon()
+        assertTrue(m.phase in 0.0..1.0)
+        assertTrue(m.illumination in 0..100)
+    }
 }

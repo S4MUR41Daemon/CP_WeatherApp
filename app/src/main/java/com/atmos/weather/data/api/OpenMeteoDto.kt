@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ForecastResponse(
+    @SerialName("utc_offset_seconds") val utcOffset: Int = 0,
     val current: Current? = null,
     val hourly: Hourly? = null,
     val daily: Daily? = null
@@ -13,46 +14,47 @@ data class ForecastResponse(
 @Serializable
 data class Current(
     val time: String,
-    @SerialName("temperature_2m") val temperature: Double,
-    @SerialName("apparent_temperature") val apparent: Double,
-    @SerialName("relative_humidity_2m") val humidity: Double,
-    @SerialName("pressure_msl") val pressure: Double,
-    @SerialName("weather_code") val code: Int,
-    @SerialName("wind_speed_10m") val windSpeed: Double,
-    @SerialName("wind_direction_10m") val windDir: Double,
-    @SerialName("wind_gusts_10m") val gusts: Double,
+    @SerialName("temperature_2m") val temperature: Double = 0.0,
+    @SerialName("apparent_temperature") val apparent: Double = 0.0,
+    @SerialName("relative_humidity_2m") val humidity: Double = 0.0,
+    @SerialName("pressure_msl") val pressure: Double = 0.0,
+    @SerialName("weather_code") val code: Int = 0,
+    @SerialName("wind_speed_10m") val windSpeed: Double = 0.0,
+    @SerialName("wind_direction_10m") val windDir: Double = 0.0,
+    @SerialName("wind_gusts_10m") val gusts: Double = 0.0,
     @SerialName("uv_index") val uv: Double? = null,
     val visibility: Double? = null,
-    @SerialName("dew_point_2m") val dew: Double,
-    val precipitation: Double = 0.0
+    @SerialName("dew_point_2m") val dew: Double = 0.0,
+    val precipitation: Double = 0.0,
+    @SerialName("is_day") val isDay: Int = 1
 )
 
 @Serializable
 data class Hourly(
     val time: List<String>,
-    @SerialName("temperature_2m") val temperature: List<Double>,
+    @SerialName("temperature_2m") val temperature: List<Double?> = emptyList(),
     @SerialName("precipitation_probability") val precipProb: List<Double?> = emptyList(),
-    val precipitation: List<Double> = emptyList(),
-    @SerialName("weather_code") val code: List<Int>,
-    @SerialName("wind_speed_10m") val windSpeed: List<Double>,
-    @SerialName("wind_direction_10m") val windDir: List<Double>
+    val precipitation: List<Double?> = emptyList(),
+    @SerialName("weather_code") val code: List<Int?> = emptyList(),
+    @SerialName("wind_speed_10m") val windSpeed: List<Double?> = emptyList(),
+    @SerialName("wind_direction_10m") val windDir: List<Double?> = emptyList()
 )
 
 @Serializable
 data class Daily(
     val time: List<String>,
-    @SerialName("weather_code") val code: List<Int>,
-    @SerialName("temperature_2m_max") val tmax: List<Double>,
-    @SerialName("temperature_2m_min") val tmin: List<Double>,
-    @SerialName("precipitation_sum") val precipSum: List<Double>,
+    @SerialName("weather_code") val code: List<Int?> = emptyList(),
+    @SerialName("temperature_2m_max") val tmax: List<Double?> = emptyList(),
+    @SerialName("temperature_2m_min") val tmin: List<Double?> = emptyList(),
+    @SerialName("precipitation_sum") val precipSum: List<Double?> = emptyList(),
     @SerialName("precipitation_probability_max") val precipMax: List<Double?> = emptyList(),
-    @SerialName("wind_speed_10m_max") val windMax: List<Double>,
-    @SerialName("wind_gusts_10m_max") val gustMax: List<Double>,
-    @SerialName("wind_direction_10m_dominant") val windDir: List<Double>,
-    val sunrise: List<String>,
-    val sunset: List<String>,
+    @SerialName("wind_speed_10m_max") val windMax: List<Double?> = emptyList(),
+    @SerialName("wind_gusts_10m_max") val gustMax: List<Double?> = emptyList(),
+    @SerialName("wind_direction_10m_dominant") val windDir: List<Double?> = emptyList(),
+    val sunrise: List<String> = emptyList(),
+    val sunset: List<String> = emptyList(),
     @SerialName("uv_index_max") val uvMax: List<Double?> = emptyList(),
-    @SerialName("daylight_duration") val daylight: List<Double>
+    @SerialName("daylight_duration") val daylight: List<Double?> = emptyList()
 )
 
 @Serializable

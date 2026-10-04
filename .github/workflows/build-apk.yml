@@ -37,10 +37,17 @@ jobs:
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest --no-daemon
 
-      - name: Build debug APK
-        run: ./gradlew assembleDebug --no-daemon
+      - name: Build APKs (release optimizado + debug)
+        run: ./gradlew assembleRelease assembleDebug --no-daemon
 
-      - name: Upload APK
+      - name: Upload release APK (recomendado, mucho más fluido)
+        uses: actions/upload-artifact@v4
+        with:
+          name: atmos-release
+          path: app/build/outputs/apk/release/app-release.apk
+          if-no-files-found: error
+
+      - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
           name: atmos-debug
