@@ -80,7 +80,8 @@ class AtmosViewModel(app: Application) : AndroidViewModel(app) {
             _state.update {
                 it.copy(weather = ui, location = cached.location, loading = false, lastFetchTs = cached.bundle.fetchedAt)
             }
-            if (System.currentTimeMillis() - cached.bundle.fetchedAt > 30 * 60 * 1000L) refresh(cached.location)
+            // Se muestra la caché al instante y se sincroniza solo, sin pulsar SYNC.
+            syncLocation(cached.location)
             return
         }
         val gps = container.location.getCurrent()
@@ -90,6 +91,26 @@ class AtmosViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun refresh() { state.value.location?.let { refresh(it) } }
+
+    /**
+     * Sincronización automática al abrir o volver a ATMOS. Si la ubicación es GPS, se relee la posición
+     * (petición puntual de baja precisión, sin seguimiento continuo). Se ignora si el último sync tiene
+     * menos de 2 minutos o ya hay uno en marcha.
+     */
+    fun autoSync() {
+        val loc = state.value.location ?: return
+        if (refreshJob?.isActive == true) return
+        if (System.currentTimeMillis() - state.value.lastFetchTs < 2 * 60 * 1000L) return
+        syncLocation(loc)
+    }
+
+    private fun syncLocation(loc: SavedCity) {
+        if (!loc.gps) { refresh(loc); return }
+        viewModelScope.launch {
+            val g = container.location.getCurrent()
+            refresh(g?.let { SavedCity(it.name, it.lat, it.lon, it.region, gps = true, manual = false) } ?: loc)
+        }
+    }
 
     private fun refresh(loc: SavedCity) {
         refreshJob?.cancel()

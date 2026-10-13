@@ -42,5 +42,10 @@ class MainActivity : ComponentActivity() {
         }
 
         setContent { AtmosScreen(vm) }
+
+        // Cada vez que ATMOS pasa a primer plano, sincroniza sola.
+        lifecycle.addObserver(androidx.lifecycle.LifecycleEventObserver { _, e ->
+            if (e == androidx.lifecycle.Lifecycle.Event.ON_START) vm.autoSync()
+        })
     }
 }

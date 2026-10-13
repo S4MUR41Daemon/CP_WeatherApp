@@ -28,6 +28,14 @@ class RefreshWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ct
 }
 
 object RefreshScheduler {
+    /** Sync puntual en segundo plano (lo pide el launcher si la caché está vieja). Uno a la vez. */
+    fun refreshNow(ctx: Context) {
+        val req = androidx.work.OneTimeWorkRequestBuilder<RefreshWorker>()
+            .setConstraints(Constraints.Builder().setRequiredNetworkType(NetworkType.CONNECTED).build())
+            .build()
+        WorkManager.getInstance(ctx).enqueueUniqueWork("atmos_refresh_now", androidx.work.ExistingWorkPolicy.KEEP, req)
+    }
+
     const val WORK_NAME = "atmos_refresh"
     fun schedule(ctx: Context, minutes: Int) {
         val constraints = Constraints.Builder()

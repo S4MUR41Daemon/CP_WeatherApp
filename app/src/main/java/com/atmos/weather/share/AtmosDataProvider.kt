@@ -26,6 +26,7 @@ import kotlinx.serialization.json.Json
  *  - `getWeather` → `json` (ver [SharedWeather]) y `ts` (último sync, ms).
  *  - `getTheme`   → `theme` (id de plantilla).
  *  - `setTheme`   → arg = id; cambia la plantilla de ATMOS y repinta su widget.
+ *  - `requestRefresh` → si la caché tiene más de 30 min, encola un sync en segundo plano.
  *
  * Tras cada sync o cambio de tema se hace notifyChange([URI]) para que el launcher se refresque
  * sin sondear.
@@ -60,6 +61,13 @@ class AtmosDataProvider : ContentProvider() {
                     putString("json", json.encodeToString(shared))
                     putLong("ts", cached.bundle.fetchedAt)
                 }
+            }
+            "requestRefresh" -> {
+                // El launcher lo llama al encenderse la pantalla de inicio: solo si la caché tiene > 30 min.
+                val ts = runBlocking { app.container.repository.loadCached()?.bundle?.fetchedAt } ?: 0L
+                val stale = System.currentTimeMillis() - ts > 30 * 60 * 1000L
+                if (stale) com.atmos.weather.work.RefreshScheduler.refreshNow(ctx)
+                Bundle().apply { putBoolean("queued", stale) }
             }
             "getTheme" -> Bundle().apply {
                 putString("theme", runBlocking { app.container.prefs.themeId.first() } ?: Palettes.NIGHT_CITY.id)
