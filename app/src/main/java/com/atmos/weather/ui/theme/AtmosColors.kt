@@ -68,7 +68,16 @@ object Palettes {
         text = Color(0xFFE9FFEC), muted = Color(0xFF7FA088), dim = Color(0xFF3A5242)
     )
 
-    val all = listOf(NIGHT_CITY, EVA_001, NOCHE_NEON, GREEN_LANTERN)
+    /** Hueso, sangre y brasa (la misma plantilla que el launcher). */
+    val HELLFIRE = Palette(
+        id = "hellfire", name = "HELLFIRE",
+        bg = Color(0xFF070606), panel = Color(0xFF110E0E), panelHi = Color(0xFF1A1515),
+        primary = Color(0xFFE9E2D3), secondary = Color(0xFFB3001B), secondarySoft = Color(0xFFE0303F),
+        data = Color(0xFFFF6A2B), warn = Color(0xFFFF2A2A),
+        text = Color(0xFFEDE7DA), muted = Color(0xFF8A837A), dim = Color(0xFF4A4440)
+    )
+
+    val all = listOf(NIGHT_CITY, EVA_001, NOCHE_NEON, GREEN_LANTERN, HELLFIRE)
 
     fun byId(id: String?): Palette = all.firstOrNull { it.id == id } ?: NIGHT_CITY
 }

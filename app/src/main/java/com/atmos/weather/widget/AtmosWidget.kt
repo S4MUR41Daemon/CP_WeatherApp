@@ -49,6 +49,7 @@ private class WidgetColors(p: Palette) {
         Palettes.EVA_001.id -> R.drawable.widget_frame_eva001
         Palettes.NOCHE_NEON.id -> R.drawable.widget_frame_noche_neon
         Palettes.GREEN_LANTERN.id -> R.drawable.widget_frame_green_lantern
+        Palettes.HELLFIRE.id -> R.drawable.widget_frame_hellfire
         else -> R.drawable.widget_frame_night_city
     }
 }
