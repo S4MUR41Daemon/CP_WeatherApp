@@ -60,6 +60,8 @@ private val LARGE = DpSize(250.dp, 220.dp)
 object WidgetUpdater {
     suspend fun update(context: Context) {
         try { AtmosWidget().updateAll(context) } catch (_: Throwable) {}
+        // Mismo momento en que cambian los datos del widget: avisa también al launcher.
+        com.atmos.weather.share.AtmosDataProvider.notifyChanged(context)
     }
 }
 
