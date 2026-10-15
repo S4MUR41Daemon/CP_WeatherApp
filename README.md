@@ -1,5 +1,11 @@
 # ATMOS//OS
 
+## ⬇️ Descargar
+
+**[Descarga la última APK aquí](https://github.com/S4MUR41Daemon/CP_WeatherApp/releases/latest)** (en *Assets*). No hace falta compilar nada: ábrela en el móvil y acepta instalar.
+Las versiones se publican solas: al crear un tag `vX.Y.Z`, GitHub Actions compila la APK firmada y la sube a *Releases*.
+
+
 App Android nativa del tiempo (Kotlin + Jetpack Compose) con estética Cyberpunk 2077: marcos neón biselados
 amarillo/rojo, aberración cromática, glitch al sincronizar y lluvia de datos.
 
